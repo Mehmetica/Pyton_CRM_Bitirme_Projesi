@@ -5,7 +5,7 @@ from google.oauth2.service_account import Credentials
 import pandas as pd
 from Admin_Menu import AdminMenuWindow
 import sys
-
+from user_menu import UserMenuWindow
 
 class Ui_Form:
     def setupUi(self, Form):
@@ -79,17 +79,22 @@ creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
 client = gspread.authorize(creds)
 
 
+
 def get_users_from_drive():
     """Google Drive'dan kullanicilari çeker ve DataFrame olarak döndürür."""
     try:
         # Yeni dosya adi veya ID ile bağlan
-        sheet = client.open("Kullanicilar").sheet1  # Google Sheets adi
+        sheet = client.open("Kullanicilar").sheet1  # Google Sheets adi client.open("Kullanicilar").sheet1.sheet.get_all_records()[2]
         data = sheet.get_all_records()
+        ############################
+        print(data)
         return pd.DataFrame(data)
     except gspread.exceptions.SpreadsheetNotFound:
         raise FileNotFoundError("Google Sheets 'Kullanicilar' çalişma kitabi bulunamadi!")
     except Exception as e:
         raise Exception(f"Google Sheets'e bağlanirken bir hata oluştu: {str(e)}")
+    
+  
 
 
 class LoginWindow(QtWidgets.QWidget):
@@ -105,20 +110,35 @@ class LoginWindow(QtWidgets.QWidget):
         """Kullanici adi ve şifreyi Google Drive'daki verilerle doğrular."""
         username = self.ui.line_login_username.text()
         password = self.ui.line_login_password.text()
+
+        # Kullanıcıyı filtrele
         user = self.users_df[
             (self.users_df['kullanici'] == username) & (self.users_df['parola'] == password)
         ]
 
-        if not user.empty:
-            self.open_admin_menu()
+        if not user.empty:  # Eğer kullanıcı bulunduysa
+            yetki = user.iloc[0]['yetki']  # Kullanıcının yetkisini al
+            if yetki == 'admin':
+                self.open_admin_menu()
+            elif yetki == 'user':
+                self.open_user_menu()
+            else:
+                QtWidgets.QMessageBox.warning(self, "Login Failed", "Unknown role detected.")
         else:
             QtWidgets.QMessageBox.warning(self, "Login Failed", "Invalid username or password.")
+
 
     def open_admin_menu(self):
         """Başarili giriş sonrasi Admin Menu ekranini açar."""
         self.admin_menu = AdminMenuWindow()
         self.admin_menu.show()
         self.close()
+
+    def open_user_menu(self):
+        self.user_menu = UserMenuWindow()
+        self.user_menu.show()
+        self.close()
+
 
     def close_application(self):
         """Uygulamayi kapatir."""
