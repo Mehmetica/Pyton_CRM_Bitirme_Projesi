@@ -3,7 +3,7 @@ from PyQt6.QtCore import Qt  # Alignment için doğru modül
 import gspread
 from google.oauth2.service_account import Credentials
 import pandas as pd
-from Admin_Menu import AdminMenuWindow
+from admin_menu_preferences import AdminMenuPreferencesWindow
 import sys
 from user_menu import UserMenuWindow
 
@@ -75,7 +75,8 @@ class Ui_Form:
 
 # Google Sheets API bağlantisi
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
+creds = Credentials.from_service_account_file("/Users/mehmetgezer/Python Calismalari/Bitirme_Projesi/credentials.json", scopes=scope)#json dosyasi nerdeyse onun konumunu gir ki karisiklik olmasin
+#  creds = Credentials.from_service_account_file("credentials.json", scopes=scope)
 client = gspread.authorize(creds)
 
 
@@ -87,7 +88,7 @@ def get_users_from_drive():
         sheet = client.open("Kullanicilar").sheet1  # Google Sheets adi client.open("Kullanicilar").sheet1.sheet.get_all_records()[2]
         data = sheet.get_all_records()
         ############################
-        print(data)
+        # print(data)
         return pd.DataFrame(data)
     except gspread.exceptions.SpreadsheetNotFound:
         raise FileNotFoundError("Google Sheets 'Kullanicilar' çalişma kitabi bulunamadi!")
@@ -130,7 +131,7 @@ class LoginWindow(QtWidgets.QWidget):
 
     def open_admin_menu(self):
         """Başarili giriş sonrasi Admin Menu ekranini açar."""
-        self.admin_menu = AdminMenuWindow()
+        self.admin_menu = AdminMenuPreferencesWindow()
         self.admin_menu.show()
         self.close()
 

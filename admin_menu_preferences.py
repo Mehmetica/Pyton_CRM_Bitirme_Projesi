@@ -2,6 +2,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from Applications import ApplicationsWindow 
 from Interviews import InterviewsWindow  
 from Mentor_Meetings import MentorMeetingsWindow  
+from Admin_Menu import AdminMenuWindow
 
 
 import sys
@@ -12,12 +13,12 @@ sys.excepthook = exception_hook
 
 
 
-class UserMenuWindow(QtWidgets.QWidget):
+class AdminMenuPreferencesWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
 
         # Pencere başlığını ve boyutlarını ayarla
-        self.setObjectName("UserMenu")
+        self.setObjectName("Admin_Menu_Preferences")
         self.resize(600, 400)
         self.setFixedSize(600, 400)
 
@@ -47,20 +48,28 @@ class UserMenuWindow(QtWidgets.QWidget):
         self.p_mentorMeeting.setText("Interviews")
         self.p_mentorMeeting.clicked.connect(self.open_interviews)
 
-
-        self.pushButton_exit = QtWidgets.QPushButton(parent=self.frame)
-        self.pushButton_exit.setGeometry(QtCore.QRect(180, 190, 101, 31))
-        self.pushButton_exit.setStyleSheet("QPushButton { background-color: rgb(211, 0, 0); color: white; border-radius: 10px; border: 2px solid #000000; } QPushButton:hover { background-color: rgb(223, 194, 107); }")
-        self.pushButton_exit.setText("Exit")
-        self.pushButton_exit.clicked.connect(self.exit_program)  # Çıkış butonunu bağladık
-        # self.pushButton_exit.clicked.connect(self.open_loginpage)
-
-
         self.p_mentorMeeting_2 = QtWidgets.QPushButton(parent=self.frame)
         self.p_mentorMeeting_2.setGeometry(QtCore.QRect(120, 140, 211, 41))
         self.p_mentorMeeting_2.setStyleSheet("QPushButton { background-color: rgb(2, 50, 90); color: white; border-radius: 10px; border: 2px solid #000000; } QPushButton:hover { background-color: rgb(223, 194, 107); }")
         self.p_mentorMeeting_2.setText("Mentor Meeting")
         self.p_mentorMeeting_2.clicked.connect(self.open_mentor_meeting)
+
+        self.p_admin_menu = QtWidgets.QPushButton(parent=self.frame)
+        self.p_admin_menu.setGeometry(QtCore.QRect(120, 190, 211, 41))
+        self.p_admin_menu.setStyleSheet("QPushButton { background-color: rgb(2, 50, 90); color: white; border-radius: 10px; border: 2px solid #000000; } QPushButton:hover { background-color: rgb(223, 194, 107); }")
+        self.p_admin_menu.setText("Admin Menu")
+        self.p_admin_menu.clicked.connect(self.open_admin_menu)
+
+
+        self.pushButton_exit = QtWidgets.QPushButton(parent=self)
+        self.pushButton_exit.setGeometry(QtCore.QRect(240, 350, 131, 31))
+        self.pushButton_exit.setStyleSheet("QPushButton { background-color: rgb(211, 0, 0); color: white; border-radius: 10px; border: 2px solid #000000; } QPushButton:hover { background-color: rgb(223, 194, 107); }")
+        self.pushButton_exit.setText("Exit")
+        self.pushButton_exit.clicked.connect(self.exit_program)  
+        # self.pushButton_exit.clicked.connect(self.open_loginpage)
+
+
+       
 
         # Başlık etiketi
         self.label_title = QtWidgets.QLabel(parent=self)
@@ -70,7 +79,7 @@ class UserMenuWindow(QtWidgets.QWidget):
         font.setPointSize(28)
         self.label_title.setFont(font)
         self.label_title.setStyleSheet("background-color: rgb(223, 194, 107); color: rgb(2, 50, 90); border-radius: 10px; padding: 5px;")
-        self.label_title.setText("              User Menu")
+        self.label_title.setText("             Admin Menu")
         
 
     def open_applications(self):
@@ -84,6 +93,10 @@ class UserMenuWindow(QtWidgets.QWidget):
     def open_mentor_meeting(self):
         self.mentor_meetings_window = MentorMeetingsWindow()
         self.mentor_meetings_window.show()
+
+    def open_admin_menu(self):
+        self.admin_menu_window= AdminMenuWindow()
+        self.admin_menu_window.show()
 
     # def open_loginpage(self):
     #     self.login_page= LoginWindow()
@@ -99,6 +112,6 @@ class UserMenuWindow(QtWidgets.QWidget):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    window = UserMenuWindow()
+    window = AdminMenuPreferencesWindow()
     window.show()
     sys.exit(app.exec())
