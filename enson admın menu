@@ -1,0 +1,111 @@
+import sys
+import json
+import smtplib
+import os
+from PyQt6 import QtWidgets, QtCore, QtGui
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+# Google API Kimlik Doğrulama
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', 'https://www.googleapis.com/auth/drive.file']
+SERVICE_ACCOUNT_FILE = 'credentials.json'
+
+credentials = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+calendar_service = build('calendar', 'v3', credentials=credentials)
+drive_service = build('drive', 'v3', credentials=credentials)
+
+class Ui_Form:
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.resize(682, 411)
+        self.setFixedSize(682, 411)
+
+        self.label = QtWidgets.QLabel(parent=Form)
+        self.label.setGeometry(QtCore.QRect(-20, -10, 711, 431))
+        self.label.setPixmap(QtGui.QPixmap("background.jpg"))
+        self.label.setScaledContents(True)
+
+        self.frame = QtWidgets.QFrame(parent=Form)
+        self.frame.setGeometry(QtCore.QRect(20, 140, 641, 221))
+        self.frame.setStyleSheet("QFrame { background-color: #F0F0F0; border: 2px solid black; border-radius: 10px; }")
+
+        self.tableWidget_2 = QtWidgets.QTableWidget(parent=self.frame)
+        self.tableWidget_2.setGeometry(QtCore.QRect(10, 20, 621, 191))
+        self.tableWidget_2.setRowCount(1)
+        self.tableWidget_2.setColumnCount(4)
+        self.tableWidget_2.setHorizontalHeaderLabels(["Title", "Start Time", "Organizer", "Participants"])
+
+        self.push_admin_mail = QtWidgets.QPushButton(parent=Form, text="Mail")
+        self.push_admin_mail.setGeometry(QtCore.QRect(270, 100, 151, 31))
+        self.push_admin_mail.clicked.connect(self.send_emails)
+
+        self.push_admin_menu = QtWidgets.QPushButton(parent=Form, text="Main Menu")
+        self.push_admin_menu.setGeometry(QtCore.QRect(470, 100, 151, 31))
+        self.push_admin_menu.clicked.connect(self.open_main_menu)
+
+        self.push_admin_event = QtWidgets.QPushButton(parent=Form, text="Event Registration")
+        self.push_admin_event.setGeometry(QtCore.QRect(60, 100, 151, 31))
+        self.push_admin_event.clicked.connect(self.load_events)
+
+        self.push_admin_exit = QtWidgets.QPushButton(parent=Form, text="Exit")
+        self.push_admin_exit.setGeometry(QtCore.QRect(10, 370, 75, 24))
+        self.push_admin_exit.clicked.connect(self.exit_application)
+
+    def load_events(self):
+        events_result = calendar_service.events().list(calendarId='primary', maxResults=10).execute()
+        events = events_result.get('items', [])
+        self.tableWidget_2.setRowCount(len(events))
+
+        for row, event in enumerate(events):
+            title = event.get('summary', 'No Title')
+            start_time = event['start'].get('dateTime', event['start'].get('date', 'No Date'))
+            organizer = event.get('organizer', {}).get('email', 'Unknown')
+            participants = ', '.join([p['email'] for p in event.get('attendees', []) if 'email' in p])
+
+            self.tableWidget_2.setItem(row, 0, QtWidgets.QTableWidgetItem(title))
+            self.tableWidget_2.setItem(row, 1, QtWidgets.QTableWidgetItem(start_time))
+            self.tableWidget_2.setItem(row, 2, QtWidgets.QTableWidgetItem(organizer))
+            self.tableWidget_2.setItem(row, 3, QtWidgets.QTableWidgetItem(participants))
+    
+    def send_emails(self):
+        sender_email = "your-email@gmail.com"
+        sender_password = "your-password"
+        subject = "Event Reminder"
+
+        for row in range(self.tableWidget_2.rowCount()):
+            participant_emails = self.tableWidget_2.item(row, 3).text().split(', ')
+            for recipient in participant_emails:
+                message = MIMEMultipart()
+                message['From'] = sender_email
+                message['To'] = recipient
+                message['Subject'] = subject
+                body = f"Reminder: You have an event scheduled."
+                message.attach(MIMEText(body, 'plain'))
+
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+                    server.login(sender_email, sender_password)
+                    server.sendmail(sender_email, recipient, message.as_string())
+
+        QtWidgets.QMessageBox.information(None, "Mail Sent", "Emails have been sent successfully!")
+
+    def upload_to_drive(self, file_path):
+        file_metadata = {'name': os.path.basename(file_path)}
+        media = MediaFileUpload(file_path, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        drive_service.files().create(body=file_metadata, media_body=media).execute()
+        QtWidgets.QMessageBox.information(None, "Upload Success", "File uploaded to Google Drive.")
+
+    def open_main_menu(self):
+        QtWidgets.QMessageBox.information(None, "Main Menu", "Returning to Main Menu...")
+
+    def exit_application(self):
+        sys.exit()
+
+if __name__ == "__main__":
+    app = QtWidgets.QApplication(sys.argv)
+    admin_menu = QtWidgets.QWidget()
+    ui = Ui_Form()
+    ui.setupUi(admin_menu)
+    admin_menu.show()
+    sys.exit(app.exec())
