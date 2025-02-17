@@ -326,7 +326,7 @@ class Ui_Form(object):
 
                 for row_idx, row in enumerate(filtered_df.itertuples(index=False)):
                      self.table_app_anatablo.insertRow(row_idx)
-                     for col_idx, value in enumerate(row[1:]):  # İlk elemanı atlamak için [1:]
+                     for col_idx, value in enumerate(row):  
                         self.table_app_anatablo.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
           except Exception as e:
                print(f"Error loading data: {e}")
@@ -418,7 +418,7 @@ class Ui_Form(object):
 
                 for row_idx, row in enumerate(filtered_df.itertuples(index=False)):
                      self.table_app_anatablo.insertRow(row_idx)
-                     for col_idx, value in enumerate(row[1:]):  # İlk elemanı atlamak için [1:]
+                     for col_idx, value in enumerate(row):  
                         self.table_app_anatablo.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
          except Exception as e: 
                print(f"Error loading data: {e}")
