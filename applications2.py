@@ -128,6 +128,7 @@ class Ui_Form(object):
 "    background-color: rgb(223, 194, 107); /* Üzerine gelince açık yeşil */\n"
 "}")
         self.pushButton_menu.setObjectName("pushButton_menu")
+        self.pushButton_menu.clicked.connect(self.show_main_menu)
         self.pushButton_exit = QtWidgets.QPushButton(parent=Form)
         self.pushButton_exit.setGeometry(QtCore.QRect(30, 460, 75, 24))
         self.pushButton_exit.setStyleSheet("QPushButton {\n"
@@ -142,6 +143,7 @@ class Ui_Form(object):
 "    background-color: rgb(223, 194, 107); /* Üzerine gelince açık yeşil */\n"
 "}")
         self.pushButton_exit.setObjectName("pushButton_exit")
+        self.pushButton_exit.clicked.connect(self.close)
         self.table_app_anatablo = QtWidgets.QTableWidget(parent=Form)
         self.table_app_anatablo.setGeometry(QtCore.QRect(30, 190, 691, 261))
         self.table_app_anatablo.setStyleSheet("QTableWidget {\n"
@@ -380,7 +382,13 @@ class Ui_Form(object):
 
     def show_main_menu(self):
         # Main Menu butonu işlevi
-            pass
+         if self.previous_window:
+            self.previous_window.show()
+        else:
+            from user_menu import UserMenuWindow
+            user_menu= UserMenuWindow()
+            user_menu.show()
+        self.close()
 
     def show_planned_meetings(self):
         # Planned Mentor Meetings butonu işlevi
